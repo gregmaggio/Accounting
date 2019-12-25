@@ -1,0 +1,58 @@
+<web-app version="3.0"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+         http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+         metadata-complete="true">
+
+	<display-name>Accounting</display-name>
+	
+	<listener>
+		<listener-class>ca.datamagic.accounting.servlet.AccountingContextListener</listener-class>
+	</listener>
+
+    <servlet>
+        <servlet-name>Accounting</servlet-name>
+        <servlet-class>ca.datamagic.accounting.servlet.AccountingServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Import</servlet-name>
+        <servlet-class>ca.datamagic.accounting.servlet.ImportServlet</servlet-class>
+    </servlet>
+	<servlet>
+        <servlet-name>SwaggerUI</servlet-name>
+        <servlet-class>ca.datamagic.accounting.servlet.SwaggerUIServlet</servlet-class>
+    </servlet>
+	<servlet>
+        <servlet-name>SwaggerResources</servlet-name>
+        <servlet-class>ca.datamagic.accounting.servlet.SwaggerResourcesServlet</servlet-class>
+    </servlet>
+	<servlet>
+        <servlet-name>SwaggerAPI</servlet-name>
+        <servlet-class>ca.datamagic.accounting.servlet.SwaggerAPIServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Import</servlet-name>
+        <url-pattern>/api/import</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Accounting</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>SwaggerUI</servlet-name>
+        <url-pattern>/swagger-resources/configuration/ui</url-pattern>
+    </servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>SwaggerResources</servlet-name>
+        <url-pattern>/swagger-resources</url-pattern>
+    </servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>SwaggerAPI</servlet-name>
+        <url-pattern>/v2/api-docs</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>swagger-ui.html</welcome-file>
+    </welcome-file-list>
+</web-app>
+

@@ -1,0 +1,160 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<title>Accounting Importers</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script type="text/javascript">
+	var Importers = {
+		initialize: function() {
+			$.ajax({
+				url: "/whoAmI",
+				success: function(result) {
+					var logout = document.getElementById("logout");
+					logout.style.visibility = "visible";
+					logout.style.display = "block";
+					Importers.loadImporters();
+				},
+				error: function( xhr, status, errorThrown ) {
+					var localhost = document.URL.toString().toLowerCase().indexOf("localhost") > -1;
+					if (localhost) {
+						window.location = "https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/userinfo.email&redirect_uri=http://localhost:8080/oauth/callback&response_type=code&client_id=378578942759.apps.googleusercontent.com&state=http://localhost:8080/Accounting/importers.html";
+					} else {
+						window.location = "https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/userinfo.email&redirect_uri=https://datamagic.ca/oauth/callback&response_type=code&client_id=378578942759.apps.googleusercontent.com&state=https://datamagic.ca/Accounting/importers.html";
+					}
+				},
+				complete: function( xhr, status) {
+				}
+			});
+		},
+		loadImporters: function() {
+			$.ajax({
+				url: "/Accounting/api/import",
+				success: function(result) {
+					if (result) {
+						var importersGrid = document.getElementById("importersGrid");
+						for (var ii = 0; ii < result.length; ii++) {
+							var span = null;				
+							span = document.createElement("span");
+							span.index = ii;
+							span.innerHTML = result[ii].date;
+							importersGrid.append(span);
+							span = document.createElement("span");
+							span.index = ii;
+							span.innerHTML = result[ii].running;
+							importersGrid.append(span);
+							span = document.createElement("span");
+							span.index = ii;
+							span.innerHTML = result[ii].error;
+							importersGrid.append(span);
+							span = document.createElement("span");
+							span.index = ii;
+							span.innerHTML = result[ii].lineNumber;
+							importersGrid.append(span);
+							span = document.createElement("span");
+							span.index = ii;
+							span.innerHTML = result[ii].startTimeUTC;
+							importersGrid.append(span);
+							span = document.createElement("span");
+							span.index = ii;
+							span.innerHTML = result[ii].endTimeUTC;
+							importersGrid.append(span);
+						}
+					}
+				},
+				error: function( xhr, status, errorThrown ) {
+					alert("Error loading importers!");
+				},
+				complete: function( xhr, status) {
+				}
+			});
+		}
+	};
+</script>
+<style type="text/css">
+  span.underline { border-bottom: 1px solid black; }
+  .secondAdopter { border: 1px solid #d1d1d1; padding: 5px; }
+  .req {
+    color: red;
+    font-weight:bold;
+  }
+  .err {
+    color: red;
+    font-weight:bold;
+  }
+  label {
+    font-weight:bold;
+  }
+  legend {
+    font-weight:bold;
+    white-space:normal;
+  }
+  legend span {
+    float:left;
+  }
+  .invalid {
+    border-color: red;
+  }
+  .fieldLabel {
+    text-align:right;
+  }
+  .fieldset-content {
+    clear:both;
+  }
+  body, input, textarea, table {
+    color: #1a1a1a;
+    font-family: Merriweather, Georgia, serif;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(50px, 100px) 2fr 1fr 1fr 2fr 2fr;
+    border-top: 1px solid black;
+    border-right: 1px solid black;
+  }
+  .grid > span {
+    padding: 8px 4px;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+  }
+</style>
+</head>
+<body>
+	<div class="container marketing">
+		<div id="logout" style="visibility:hidden;display:none;"><a href="/logout">Logout</a></div>
+		<h1>Accounting Importers</h1>
+		<a href="import.html">Import</a>
+		<div id="importersGrid" class="grid">
+			<span>
+				<strong>Date</strong>
+			</span>
+			<span>
+				<strong>Running</strong>
+			</span>
+			<span>
+				<strong>Error</strong>
+			</span> 
+			<span>
+				<strong>Line Number</strong>
+			</span> 
+			<span>
+				<strong>Start Time UTC</strong>
+			</span>
+			<span>
+				<strong>End Time UTC</strong>
+			</span>
+		</div>
+	</div>
+	<script type="text/javascript">
+	(function () {
+		$(document).ready(Importers.initialize);
+	})();
+	</script>
+	<div id="loading"></div>
+</body>
+</html>

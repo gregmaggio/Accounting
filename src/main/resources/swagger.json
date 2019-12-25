@@ -1,0 +1,212 @@
+{
+	"swagger" : "2.0",
+	"info" : {
+		"description" : "Accounting API",
+		"version" : "1.0",
+		"title" : "Accounting Service",
+		"license" : {
+			"name" : "Apache License Version 2.0"
+		}
+	},
+	"host" : "{{host}}",
+	"basePath" : "/Accounting",
+	"tags" : [{
+			"name" : "Accounting-controller",
+			"description" : "Accounting Controller"
+		}
+	],
+	"paths" : {		
+		"/api" : {
+			"post" : {
+				"tags" : ["Accounting-controller"],
+				"summary" : "Accounting handler",
+				"operationId" : "Post",
+				"consumes" : ["application/json"],
+				"produces" : ["*/*"],
+				"parameters" : [{
+						"in": "body",
+						"name": "body",
+						"description": "Accounting information to log",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/AccountingParameters"
+						}
+					}
+				],
+				"responses" : {
+					"200" : {
+						"description" : "OK",
+						"schema" : {
+							"type" : "string"
+						}
+					},
+					"401" : {
+						"description" : "Unauthorized"
+					},
+					"403" : {
+						"description" : "Forbidden"
+					},
+					"404" : {
+						"description" : "Not Found"
+					}
+				}
+			}
+		},
+		"/api/stats/{startYear}/{startMonth}/{startDay}/{endYear}/{endMonth}/{endDay}" : {
+			"get" : {
+				"tags" : ["Accounting-controller"],
+				"summary" : "stats",
+				"operationId" : "stats",
+				"consumes" : ["application/json"],
+				"produces" : ["*/*"],
+				"parameters" : [{
+						"name" : "startYear",
+						"in" : "path",
+						"description" : "startYear",
+						"required" : true,
+						"type" : "integer"
+					},{
+						"name" : "startMonth",
+						"in" : "path",
+						"description" : "startMonth",
+						"required" : true,
+						"type" : "integer"
+					},{
+						"name" : "startDay",
+						"in" : "path",
+						"description" : "startDay",
+						"required" : true,
+						"type" : "integer"
+					},{
+						"name" : "endYear",
+						"in" : "path",
+						"description" : "endYear",
+						"required" : true,
+						"type" : "integer"
+					},{
+						"name" : "endMonth",
+						"in" : "path",
+						"description" : "endMonth",
+						"required" : true,
+						"type" : "integer"
+					},{
+						"name" : "endDay",
+						"in" : "path",
+						"description" : "endDay",
+						"required" : true,
+						"type" : "integer"
+					}
+				],
+				"responses" : {
+					"200" : {
+						"description" : "OK",
+						"schema" : {
+							"type" : "array",
+							"items" : {
+								"$ref" : "#/definitions/EventDTO"
+							}
+						}
+					},
+					"401" : {
+						"description" : "Unauthorized"
+					},
+					"403" : {
+						"description" : "Forbidden"
+					},
+					"404" : {
+						"description" : "Not Found"
+					}
+				}
+			}
+		},
+		"/api/min" : {
+			"get" : {
+				"tags" : ["Accounting-controller"],
+				"summary" : "min",
+				"operationId" : "min",
+				"consumes" : ["application/json"],
+				"produces" : ["*/*"],
+				"parameters" : [
+				],
+				"responses" : {
+					"200" : {
+						"description" : "OK",
+						"schema" : {
+							"type" : "String"
+						}
+					},
+					"401" : {
+						"description" : "Unauthorized"
+					},
+					"403" : {
+						"description" : "Forbidden"
+					},
+					"404" : {
+						"description" : "Not Found"
+					}
+				}
+			}
+		},
+		"/api/max" : {
+			"get" : {
+				"tags" : ["Accounting-controller"],
+				"summary" : "max",
+				"operationId" : "max",
+				"consumes" : ["application/json"],
+				"produces" : ["*/*"],
+				"parameters" : [
+				],
+				"responses" : {
+					"200" : {
+						"description" : "OK",
+						"schema" : {
+							"type" : "String"
+						}
+					},
+					"401" : {
+						"description" : "Unauthorized"
+					},
+					"403" : {
+						"description" : "Forbidden"
+					},
+					"404" : {
+						"description" : "Not Found"
+					}
+				}
+			}
+		}
+	},
+	"definitions" : {
+		"AccountingParameters" : {
+			"type" : "object",
+			"properties" : {
+				"deviceLatitude" : {
+					"type" : "number",
+					"format" : "double"
+				},
+				"deviceLongitude" : {
+					"type" : "number",
+					"format" : "double"
+				},
+				"eventName" : {
+					"type" : "string"
+				},
+				"eventMessage" : {
+					"type" : "string"
+				}
+			}
+		},
+		"EventDTO" : {
+			"type" : "object",
+			"properties" : {
+				"name" : {
+					"type" : "eventName"
+				},
+				"count" : {
+					"type" : "number",
+					"format" : "long"
+				}
+			}
+		}
+	}
+}
