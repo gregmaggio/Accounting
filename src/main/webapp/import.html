@@ -14,6 +14,12 @@
 			$( "#date" ).datepicker({
 				dateFormat: "yy-mm-dd"
 			});
+			$( "#startDate" ).datepicker({
+				dateFormat: "yy-mm-dd"
+			});
+			$( "#endDate" ).datepicker({
+				dateFormat: "yy-mm-dd"
+			});
 			$.ajax({
 				url: "/whoAmI",
 				success: function(result) {
@@ -36,62 +42,65 @@
 		importButtonClick: function() {
 			var importForm = document.getElementById("importForm");
 			var date = document.getElementById("date");
-			if (!date.value) {
+			var startDate = document.getElementById("startDate");
+			var endDate = document.getElementById("endDate");			
+			if (!date.value && !startDate.value && !endDate.value) {
 				alert("Date required");
 				date.focus();
+				return;
+			}
+			if (startDate.value && !endDate.value) {
+				alert("End Date required");
+				endDate.focus();
+				return;
+			}
+			if (!startDate.value && endDate.value) {
+				alert("Start Date required");
+				startDate.focus();
 				return;
 			}
 			importForm.submit();
 		}
 	};
 </script>
-<style type="text/css">
-  span.underline { border-bottom: 1px solid black; }
-  .secondAdopter { border: 1px solid #d1d1d1; padding: 5px; }
-  .req {
-    color: red;
-    font-weight:bold;
-  }
-  .err {
-    color: red;
-    font-weight:bold;
-  }
-  label {
-    font-weight:bold;
-  }
-  legend {
-    font-weight:bold;
-    white-space:normal;
-  }
-  legend span {
-    float:left;
-  }
-  .invalid {
-    border-color: red;
-  }
-  .fieldLabel {
-    text-align:right;
-  }
-  .fieldset-content {
-    clear:both;
-  }
-  body, input, textarea, table {
-    color: #1a1a1a;
-    font-family: Merriweather, Georgia, serif;
-    font-size: 1rem;
-    line-height: 1.75;
-  }
-</style>
 </head>
 <body>
 	<div class="container marketing">
 		<div id="logout" style="visibility:hidden;display:none;"><a href="/logout">Logout</a></div>
 		<h1>Accounting Import</h1>
-		<form id="importForm" method="post" action="/Accounting/api/import" contentType="application/x-www-form-urlencoded">
-			<div>
-				<label for="date">Date:</label>&nbsp;<input id="date" name="date" type="text" value="" size="14" maxlength="255" tabindex="1" />
-			</div>
-			<button id="importButton" name="importButton" tabindex="2" onclick="Import.importButtonClick(); return false;">Import</button>
+		<form id="importForm" autocomplete="off" method="post" action="/Accounting/api/import" contentType="application/x-www-form-urlencoded">
+			<table>
+				<tr>
+					<td><strong>Date:</strong></td>
+					<td style="width:5px;">&nbsp;</td>
+					<td><input id="date" name="date" type="text" value="" size="14" maxlength="255" tabindex="1" /></td>
+				</tr>
+				<tr>
+					<td colspan="3"><br /></td>
+				</tr>
+				<tr>
+					<td colspan="3"><strong>OR</strong></td>
+				</tr>
+				<tr>
+					<td colspan="3"><br /></td>
+				</tr>
+				<tr>
+					<td><strong>Start Date:</strong></td>
+					<td style="width:5px;">&nbsp;</td>
+					<td><input id="startDate" name="startDate" type="text" value="" size="14" maxlength="255" tabindex="1" /></td>
+				</tr>
+				<tr>
+					<td><strong>End Date:</strong></td>
+					<td style="width:5px;">&nbsp;</td>
+					<td><input id="endDate" name="endDate" type="text" value="" size="14" maxlength="255" tabindex="1" /></td>
+				</tr>
+				<tr>
+					<td colspan="3"><br /></td>
+				</tr>
+				<tr>
+					<td colspan="3"><button id="importButton" name="importButton" tabindex="2" onclick="Import.importButtonClick(); return false;">Import</button></td>
+				</tr>
+			</table>
 		</form>
 	</div>
 	<script type="text/javascript">

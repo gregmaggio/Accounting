@@ -5,9 +5,12 @@ package ca.datamagic.accounting.importer;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 
 import ca.datamagic.accounting.dao.AccountingDAO;
 import ca.datamagic.accounting.dto.AccountingDTO;
+import ca.datamagic.accounting.util.DBUtils;
 
 /**
  * @author Greg
@@ -34,6 +38,8 @@ public class Importer {
 	private static SimpleDateFormat utcDateFormat = null;
 	private static SimpleDateFormat utcTimeFormat = null;
 	private static final List<Importer> importers = new ArrayList<Importer>();
+	private static AccountingDAO dao = null;
+	private static Connection connection = null;
 	private String date = null;
 	private boolean running = false;
 	private boolean error = false;
@@ -52,6 +58,28 @@ public class Importer {
 	
 	public Importer(String date) {
 		this.date = date;
+	}
+	
+	public static synchronized void cleanUp() {
+		if (connection != null) {
+			DBUtils.close(connection);
+		}
+		dao = null;
+		connection = null;
+	}
+	
+	private static synchronized AccountingDAO getDAO() throws IOException {
+		if (dao == null) {
+			dao = new AccountingDAO();
+		}
+		return dao;
+	}
+	
+	private static synchronized Connection getConnection() throws SQLException, IOException {
+		if (connection == null) {
+			connection = getDAO().openConnection();
+		}
+		return connection;
 	}
 	
 	public boolean isRunning() {
@@ -133,6 +161,15 @@ public class Importer {
 		importers.add(importer);
 	}
 	
+	public static synchronized void clearImporters() throws Exception {
+		for (int ii = 0; ii < importers.size(); ii++) {
+			if (importers.get(ii).isRunning()) {
+				throw new Exception("Someone is still running!");
+			}
+		}
+		importers.clear();
+	}
+	
 	public void importFile() {
 		addImporter(this);
 		BufferedReader reader = null;
@@ -141,11 +178,10 @@ public class Importer {
 			this.error = false;
 			this.startTimeUTC = currentTimeGMT();
 					
-			AccountingDAO dao = new AccountingDAO();
 			TimeZone timeZone = TimeZone.getTimeZone("America/Chicago");
 			
-			String inputFileName = MessageFormat.format("{0}/accounting.csv.{1}_", dao.getInputDirectory(), this.date);
-			String outputFileName = MessageFormat.format("{0}/accounting.csv.{1}_", dao.getOutputDirectory(), this.date);
+			String inputFileName = MessageFormat.format("{0}/accounting.csv.{1}_", getDAO().getInputDirectory(), this.date);
+			String outputFileName = MessageFormat.format("{0}/accounting.csv.{1}_", getDAO().getOutputDirectory(), this.date);
 			Path inputPath = Paths.get(inputFileName);
 			Path outputPath = Paths.get(outputFileName);
 			
@@ -181,7 +217,7 @@ public class Importer {
 					accounting.setDeviceLongitude(longitude);
 					accounting.setEventName(eventName);
 					accounting.setEventMessage(eventMessage);
-					dao.save(accounting);
+					getDAO().save(accounting, getConnection());
 				}
 				this.lineNumber++;
 			}
@@ -227,5 +263,6 @@ public class Importer {
 		} catch (Throwable t) {
 			logger.error("Exception", t);
 		}
+		Importer.cleanUp();
 	}
 }

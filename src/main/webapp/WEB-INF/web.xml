@@ -19,6 +19,10 @@
         <servlet-name>Import</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.ImportServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Clear</servlet-name>
+        <servlet-class>ca.datamagic.accounting.servlet.ClearServlet</servlet-class>
+    </servlet>
 	<servlet>
         <servlet-name>SwaggerUI</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.SwaggerUIServlet</servlet-class>
@@ -34,6 +38,10 @@
     <servlet-mapping>
         <servlet-name>Import</servlet-name>
         <url-pattern>/api/import</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Clear</servlet-name>
+        <url-pattern>/api/clear</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Accounting</servlet-name>

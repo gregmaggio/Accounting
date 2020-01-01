@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import ca.datamagic.accounting.dto.AccountingDTO;
 import ca.datamagic.accounting.dto.EventDTO;
+import ca.datamagic.accounting.util.DBUtils;
 import ca.datamagic.accounting.util.IOUtils;
 
 /**
@@ -84,11 +85,25 @@ public class AccountingDAO extends BaseDAO {
 		return this.properties.getProperty("cookieName");
 	}
 	
+	public Connection openConnection() throws SQLException {
+		return DriverManager.getConnection(getConnectionString(), getUserName(), getPassword());
+	}
+	
 	public void save(AccountingDTO accounting) throws Exception {
 		Connection connection = null;
+		try {
+			connection = openConnection();
+			save(accounting, connection);
+		} finally {
+			if (connection != null) {
+				DBUtils.close(connection);
+			}
+		}
+	}
+	
+	public void save(AccountingDTO accounting, Connection connection) throws Exception {
 		PreparedStatement statement = null;
 		try {
-			connection = DriverManager.getConnection(getConnectionString(), getUserName(), getPassword());
 			statement = connection.prepareStatement("INSERT INTO accounting (time_stamp, latitude, longitude, event_name, event_message) VALUES (?, ?, ?, ?, ?)");
 			statement.setString(1, accounting.getTimeStamp());
 			if (accounting.getDeviceLatitude() == null) {
@@ -106,10 +121,7 @@ public class AccountingDAO extends BaseDAO {
 			statement.executeUpdate();
 		} finally {
 			if (statement != null) {
-				close(statement);
-			}
-			if (connection != null) {
-				close(connection);
+				DBUtils.close(statement);
 			}
 		}
 	}
@@ -162,13 +174,13 @@ public class AccountingDAO extends BaseDAO {
 			return events;
 		} finally {
 			if (resultSet != null) {
-				close(resultSet);
+				DBUtils.close(resultSet);
 			}
 			if (statement != null) {
-				close(statement);
+				DBUtils.close(statement);
 			}
 			if (connection != null) {
-				close(connection);
+				DBUtils.close(connection);
 			}
 		}
 	}
@@ -187,13 +199,13 @@ public class AccountingDAO extends BaseDAO {
 			return null;
 		} finally {
 			if (resultSet != null) {
-				close(resultSet);
+				DBUtils.close(resultSet);
 			}
 			if (statement != null) {
-				close(statement);
+				DBUtils.close(statement);
 			}
 			if (connection != null) {
-				close(connection);
+				DBUtils.close(connection);
 			}
 		}
 	}
@@ -212,13 +224,13 @@ public class AccountingDAO extends BaseDAO {
 			return null;
 		} finally {
 			if (resultSet != null) {
-				close(resultSet);
+				DBUtils.close(resultSet);
 			}
 			if (statement != null) {
-				close(statement);
+				DBUtils.close(statement);
 			}
 			if (connection != null) {
-				close(connection);
+				DBUtils.close(connection);
 			}
 		}
 	}

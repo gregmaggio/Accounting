@@ -46,14 +46,24 @@ public class ImportServlet extends AuthenticatedServlet {
 		// Get the import date from the request
 		String date = request.getParameter("date");
 		logger.debug("date: " + date);
-		if ((date == null) || (date.length() < 1)) {
+		String startDate = request.getParameter("startDate");
+		logger.debug("startDate: " + startDate);
+		String endDate = request.getParameter("endDate");
+		logger.debug("endDate: " + endDate);
+		
+		if ((date != null) && (date.length() > 0)) {
+			// Kick off the importer	
+			Thread thread = new Thread(new ImportRunner(date));
+			thread.start();
+		} else if ((startDate != null) && (startDate.length() > 0) &&
+				   (endDate != null) && (endDate.length() > 0)) {
+			// Kick off the importer	
+			Thread thread = new Thread(new ImportRunner(startDate, endDate));
+			thread.start();
+		} else {
 			response.sendError(400);
 			return;
 		}
-		
-		// Kick off the importer	
-		Thread thread = new Thread(new ImportRunner(date));
-		thread.start();
 		
 		response.sendRedirect("/Accounting/importers.html");
 	}

@@ -37,6 +37,7 @@ public class DailyImporter extends Importer {
 		} catch (Throwable t) {
 			logger.error("Exception", t);
 		}
+		Importer.cleanUp();
 	}
 
 }

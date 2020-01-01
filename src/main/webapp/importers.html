@@ -72,45 +72,24 @@
 				complete: function( xhr, status) {
 				}
 			});
+		},
+		clear : function() {
+			$.ajax({
+				url: "/Accounting/api/clear",
+				method: "post",
+				success: function(result) {
+					window.location.reload();
+				},
+				error: function( xhr, status, errorThrown ) {
+					alert("Error clearing importers!");
+				},
+				complete: function( xhr, status) {
+				}
+			});
 		}
 	};
 </script>
 <style type="text/css">
-  span.underline { border-bottom: 1px solid black; }
-  .secondAdopter { border: 1px solid #d1d1d1; padding: 5px; }
-  .req {
-    color: red;
-    font-weight:bold;
-  }
-  .err {
-    color: red;
-    font-weight:bold;
-  }
-  label {
-    font-weight:bold;
-  }
-  legend {
-    font-weight:bold;
-    white-space:normal;
-  }
-  legend span {
-    float:left;
-  }
-  .invalid {
-    border-color: red;
-  }
-  .fieldLabel {
-    text-align:right;
-  }
-  .fieldset-content {
-    clear:both;
-  }
-  body, input, textarea, table {
-    color: #1a1a1a;
-    font-family: Merriweather, Georgia, serif;
-    font-size: 1rem;
-    line-height: 1.75;
-  }
   .grid {
     display: grid;
     grid-template-columns: minmax(50px, 100px) 2fr 1fr 1fr 2fr 2fr;
@@ -128,7 +107,8 @@
 	<div class="container marketing">
 		<div id="logout" style="visibility:hidden;display:none;"><a href="/logout">Logout</a></div>
 		<h1>Accounting Importers</h1>
-		<a href="import.html">Import</a>
+		<a href="import.html">Import</a><br />
+		<a href="" onclick="Importers.clear(); return false;">Clear</a>
 		<div id="importersGrid" class="grid">
 			<span>
 				<strong>Date</strong>

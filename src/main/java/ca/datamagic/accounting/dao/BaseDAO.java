@@ -3,10 +3,6 @@
  */
 package ca.datamagic.accounting.dao;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -33,35 +29,5 @@ public abstract class BaseDAO {
 	
 	public static void setDataPath(String newVal) {
 		dataPath = newVal;
-	}
-	
-	protected static void close(Connection connection) {
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (Throwable t) {
-			logger.warn("Exception", t);
-		}
-	}
-	
-	protected static void close(Statement statement) {
-		try {
-			if (statement != null) {
-				statement.close();
-			}
-		} catch (Throwable t) {
-			logger.warn("Exception", t);
-		}
-	}
-	
-	protected static void close(ResultSet resultSet) {
-		try {
-			if (resultSet != null) {
-				resultSet.close();
-			}
-		} catch (Throwable t) {
-			logger.warn("Exception", t);
-		}
 	}
 }
