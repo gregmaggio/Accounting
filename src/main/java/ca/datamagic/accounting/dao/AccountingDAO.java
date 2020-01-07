@@ -3,7 +3,9 @@
  */
 package ca.datamagic.accounting.dao;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -17,7 +19,9 @@ import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -89,6 +93,50 @@ public class AccountingDAO extends BaseDAO {
 		return DriverManager.getConnection(getConnectionString(), getUserName(), getPassword());
 	}
 	
+	public String[] getAccountingFiles() throws IOException {
+		File inputDirectory = new File(getInputDirectory());
+		FilenameFilter filter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return (name.toLowerCase().contains("accounting.csv"));
+			}
+		};
+		String[] files = inputDirectory.list(filter);
+		Comparator<String> comparator = new Comparator<String>() {			
+			@Override
+			public int compare(String o1, String o2) {
+				if ((o1 != null) && (o2 != null)) {
+					return o1.compareToIgnoreCase(o2);
+				}
+				return 0;
+			}
+		};
+		Arrays.sort(files, comparator);
+		return files;
+	}
+	
+	public String[] getLoadedFiles() throws IOException {
+		File outputDirectory = new File(getOutputDirectory());
+		FilenameFilter filter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return (name.toLowerCase().contains("accounting.csv"));
+			}
+		};
+		String[] files = outputDirectory.list(filter);
+		Comparator<String> comparator = new Comparator<String>() {			
+			@Override
+			public int compare(String o1, String o2) {
+				if ((o1 != null) && (o2 != null)) {
+					return o1.compareToIgnoreCase(o2);
+				}
+				return 0;
+			}
+		};
+		Arrays.sort(files, comparator);
+		return files;
+	}
+	
 	public void save(AccountingDTO accounting) throws Exception {
 		Connection connection = null;
 		try {
@@ -115,9 +163,17 @@ public class AccountingDAO extends BaseDAO {
 				statement.setNull(3, Types.DOUBLE);
 			} else {
 				statement.setDouble(3, accounting.getDeviceLongitude());
+			}			
+			if (accounting.getEventName() == null) {
+				statement.setNull(4, Types.VARCHAR);
+			} else {
+				statement.setString(4, accounting.getEventName());
 			}
-			statement.setString(4, accounting.getEventName());
-			statement.setString(5, accounting.getEventMessage());
+			if (accounting.getEventMessage() == null) {
+				statement.setNull(5, Types.VARCHAR);
+			} else {
+				statement.setString(5, accounting.getEventMessage());
+			}
 			statement.executeUpdate();
 		} finally {
 			if (statement != null) {

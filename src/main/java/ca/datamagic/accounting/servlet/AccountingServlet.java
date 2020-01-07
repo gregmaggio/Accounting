@@ -34,6 +34,8 @@ public class AccountingServlet extends HttpServlet {
 	private static final Pattern accountingStatsPattern = Pattern.compile("/stats/(?<startYear>\\d+)/(?<startMonth>\\d+)/(?<startDay>\\d+)/(?<endYear>\\d+)/(?<endMonth>\\d+)/(?<endDay>\\d+)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern minTimeStampPattern = Pattern.compile("/min", Pattern.CASE_INSENSITIVE);
 	private static final Pattern maxTimeStampPattern = Pattern.compile("/max", Pattern.CASE_INSENSITIVE);
+	private static final Pattern filesPattern = Pattern.compile("/files", Pattern.CASE_INSENSITIVE);
+	private static final Pattern loadedPattern = Pattern.compile("/loaded", Pattern.CASE_INSENSITIVE);
 	
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -84,6 +86,26 @@ public class AccountingServlet extends HttpServlet {
 				AccountingDAO dao = new AccountingDAO();
 				String timeStamp = dao.maxTimeStamp();
 				String json = (new Gson()).toJson(timeStamp);
+				response.setContentType("application/json");
+				response.getWriter().println(json);
+				return;
+			}
+			Matcher filesMatcher = filesPattern.matcher(pathInfo);
+			if (filesMatcher.find()) {
+				logger.debug("filesMatcher");
+				AccountingDAO dao = new AccountingDAO();
+				String[] files = dao.getAccountingFiles();
+				String json = (new Gson()).toJson(files);
+				response.setContentType("application/json");
+				response.getWriter().println(json);
+				return;
+			}
+			Matcher loadedMatcher = loadedPattern.matcher(pathInfo);
+			if (loadedMatcher.find()) {
+				logger.debug("loadedMatcher");
+				AccountingDAO dao = new AccountingDAO();
+				String[] files = dao.getLoadedFiles();
+				String json = (new Gson()).toJson(files);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;

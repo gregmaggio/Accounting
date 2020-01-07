@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-<title>Accounting Importers</title>
+<title>Accounting Files</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -9,7 +9,9 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script type="text/javascript">
-	var Importers = {
+	var Files = {
+		_files: null,
+		_loaded: null,
 		initialize: function() {
 			$.ajax({
 				url: "/whoAmI",
@@ -17,7 +19,7 @@
 					var logout = document.getElementById("logout");
 					logout.style.visibility = "visible";
 					logout.style.display = "block";
-					Importers.loadImporters();
+					Files.loadFiles();
 				},
 				error: function( xhr, status, errorThrown ) {
 					var localhost = document.URL.toString().toLowerCase().indexOf("localhost") > -1;
@@ -31,68 +33,70 @@
 				}
 			});
 		},
-		loadImporters: function() {
+		loadFiles: function() {
 			$.ajax({
-				url: "/Accounting/api/import",
+				url: "/Accounting/api/files",
 				success: function(result) {
 					if (result) {
-						var importersGrid = document.getElementById("importersGrid");
-						for (var ii = 0; ii < result.length; ii++) {
-							var span = null;				
-							span = document.createElement("span");
-							span.index = ii;
-							span.innerHTML = result[ii].date;
-							importersGrid.append(span);
-							span = document.createElement("span");
-							span.index = ii;
-							span.innerHTML = result[ii].running;
-							importersGrid.append(span);
-							span = document.createElement("span");
-							span.index = ii;
-							span.innerHTML = result[ii].error;
-							importersGrid.append(span);
-							span = document.createElement("span");
-							span.index = ii;
-							span.innerHTML = result[ii].lineNumber;
-							importersGrid.append(span);
-							span = document.createElement("span");
-							span.index = ii;
-							span.innerHTML = result[ii].startTimeUTC;
-							importersGrid.append(span);
-							span = document.createElement("span");
-							span.index = ii;
-							span.innerHTML = result[ii].endTimeUTC;
-							importersGrid.append(span);
+						Files._files = result;
+						if (Files._files && Files._loaded) {
+							Files.renderFiles();
 						}
 					}
 				},
 				error: function( xhr, status, errorThrown ) {
-					alert("Error loading importers!");
+					alert("Error loading files!");
+				},
+				complete: function( xhr, status) {
+				}
+			});
+			$.ajax({
+				url: "/Accounting/api/loaded",
+				success: function(result) {
+					if (result) {
+						Files._loaded = result;
+						if (Files._files && Files._loaded) {
+							Files.renderFiles();
+						}
+					}
+				},
+				error: function( xhr, status, errorThrown ) {
+					alert("Error loading files!");
 				},
 				complete: function( xhr, status) {
 				}
 			});
 		},
-		clear : function() {
-			$.ajax({
-				url: "/Accounting/api/clear",
-				method: "post",
-				success: function(result) {
-					window.location.reload();
-				},
-				error: function( xhr, status, errorThrown ) {
-					alert("Error clearing importers!");
-				},
-				complete: function( xhr, status) {
+		renderFiles: function() {
+			var filesGrid = document.getElementById("filesGrid");
+			var maxLength = (Files._files.length > Files._loaded.length) ? Files._files.length : Files._loaded.length;
+			for (var ii = 0; ii < maxLength; ii++) {
+				var notLoaded = "";
+				var loaded = "";
+				if (ii < Files._files.length) {
+					notLoaded = Files._files[ii];
 				}
-			});
+				if (ii < Files._loaded.length) {
+					loaded = Files._loaded[ii];
+				}
+				var span = null;				
+				span = document.createElement("span");
+				span.index = ii;
+				span.innerHTML = notLoaded;
+				filesGrid.append(span);
+				span = document.createElement("span");
+				span.index = ii;
+				span.innerHTML = loaded;
+				filesGrid.append(span);
+			}
+		
 		}
 	};
 </script>
 <style type="text/css">
   .grid {
     display: grid;
-    grid-template-columns: minmax(50px, 100px) 2fr 1fr 1fr 2fr 2fr;
+    grid-template-columns: repeat(2, 1fr);
     border-top: 1px solid black;
     border-right: 1px solid black;
   }
@@ -106,34 +110,21 @@
 <body>
 	<div class="container marketing">
 		<div id="logout" style="visibility:hidden;display:none;"><a href="/logout">Logout</a></div>
-		<h1>Accounting Importers</h1>
+		<h1>Accounting Files</h1>
 		<a href="import.html">Import</a><br />
-		<a href="files.html">Files</a><br />
-		<a href="" onclick="Importers.clear(); return false;">Clear</a>
-		<div id="importersGrid" class="grid">
+		<a href="importers.html">Importers</a>
+		<div id="filesGrid" class="grid">
 			<span>
-				<strong>Date</strong>
+				<strong>Not Loaded</strong>
 			</span>
 			<span>
-				<strong>Running</strong>
-			</span>
-			<span>
-				<strong>Error</strong>
-			</span> 
-			<span>
-				<strong>Line Number</strong>
-			</span> 
-			<span>
-				<strong>Start Time UTC</strong>
-			</span>
-			<span>
-				<strong>End Time UTC</strong>
-			</span>
+				<strong>Loaded</strong>
+			</span>		
 		</div>
 	</div>
 	<script type="text/javascript">
 	(function () {
-		$(document).ready(Importers.initialize);
+		$(document).ready(Files.initialize);
 	})();
 	</script>
 	<div id="loading"></div>

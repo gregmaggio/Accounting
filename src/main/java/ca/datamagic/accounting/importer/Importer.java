@@ -181,23 +181,58 @@ public class Importer {
 			TimeZone timeZone = TimeZone.getTimeZone("America/Chicago");
 			
 			String inputFileName = MessageFormat.format("{0}/accounting.csv.{1}_", getDAO().getInputDirectory(), this.date);
+			logger.debug("inputFileName: " + inputFileName);
 			String outputFileName = MessageFormat.format("{0}/accounting.csv.{1}_", getDAO().getOutputDirectory(), this.date);
+			logger.debug("outputFileName: " + outputFileName);
 			Path inputPath = Paths.get(inputFileName);
 			Path outputPath = Paths.get(outputFileName);
-			
+			if (Files.notExists(inputPath)) {
+				inputFileName = MessageFormat.format("{0}/accounting.csv.{1}", getDAO().getInputDirectory(), this.date);
+				logger.debug("inputFileName: " + inputFileName);
+				outputFileName = MessageFormat.format("{0}/accounting.csv.{1}", getDAO().getOutputDirectory(), this.date);
+				logger.debug("outputFileName: " + outputFileName);
+				inputPath = Paths.get(inputFileName);
+				outputPath = Paths.get(outputFileName);
+			}
+			if (Files.notExists(inputPath)) {
+				inputFileName = MessageFormat.format("{0}/accounting.csv.{1} ", getDAO().getInputDirectory(), this.date);
+				logger.debug("inputFileName: " + inputFileName);
+				outputFileName = MessageFormat.format("{0}/accounting.csv.{1} ", getDAO().getOutputDirectory(), this.date);
+				logger.debug("outputFileName: " + outputFileName);
+				inputPath = Paths.get(inputFileName);
+				outputPath = Paths.get(outputFileName);
+			}
+			if (Files.notExists(inputPath)) {
+				throw new Exception(MessageFormat.format("No accounting file found for date {0}.", this.date));
+			}
 			this.lineNumber = 0L;
 			reader = new BufferedReader(new FileReader(inputFileName));
 			String currentLine = null;
 			while ((currentLine = reader.readLine()) != null) {
 				String[] items = currentLine.split(",");
-				String timeStamp = items[0];
-				String latitudeText = items[1];
-				String longitudeText = items[2];
-				String eventName = items[3];
-				String eventMessage = items[4];
-				System.out.println(timeStamp + "," + latitudeText + "," + longitudeText + "," + eventName + "," + eventMessage);
+				String timeStamp = null;
+				String latitudeText = null;
+				String longitudeText = null;
+				String eventName = null;
+				String eventMessage = null;
+				if (items.length > 0)
+					timeStamp = items[0];
+				if (items.length > 1)
+					latitudeText = items[1];
+				if (items.length > 2)
+					longitudeText = items[2];
+				if (items.length > 3)
+					eventName = items[3];
+				if (items.length > 4)
+					eventMessage = items[4];
+				if ((timeStamp == null) || (latitudeText == null) || (longitudeText == null) || (eventName == null)) {
+					logger.warn("Could not parse all the required arguments for line " + (this.lineNumber + 1));
+					logger.warn("currentLine: " + currentLine);
+					continue;
+				}
+				logger.debug(timeStamp + "," + latitudeText + "," + longitudeText + "," + eventName + "," + eventMessage);
 				Matcher timeStampMatcher = timeStampPattern.matcher(timeStamp);
-				System.out.println("timeStampMatcher: " + timeStampMatcher.matches());
+				logger.debug("timeStampMatcher: " + timeStampMatcher.matches());
 				if (timeStampMatcher.matches()) {
 					int year = Integer.parseInt(timeStampMatcher.group("year"));
 					int month = Integer.parseInt(timeStampMatcher.group("month"));
@@ -206,7 +241,7 @@ public class Importer {
 					int minute = Integer.parseInt(timeStampMatcher.group("minute"));
 					int second = Integer.parseInt(timeStampMatcher.group("second"));
 					String timeStampUTC = localToGMT(year, month, day, hour, minute, second, timeZone);
-					System.out.println("timeStampUTC: " + timeStampUTC);
+					logger.debug("timeStampUTC: " + timeStampUTC);
 					
 					Double latitude = tryParseDouble(latitudeText);
 					Double longitude = tryParseDouble(longitudeText);

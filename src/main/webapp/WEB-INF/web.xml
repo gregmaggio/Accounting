@@ -22,7 +22,7 @@
     <servlet>
         <servlet-name>Clear</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.ClearServlet</servlet-class>
-    </servlet>
+    </servlet>    
 	<servlet>
         <servlet-name>SwaggerUI</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.SwaggerUIServlet</servlet-class>
