@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +37,17 @@ public class AccountingServlet extends HttpServlet {
 	private static final Pattern maxTimeStampPattern = Pattern.compile("/max", Pattern.CASE_INSENSITIVE);
 	private static final Pattern filesPattern = Pattern.compile("/files", Pattern.CASE_INSENSITIVE);
 	private static final Pattern loadedPattern = Pattern.compile("/loaded", Pattern.CASE_INSENSITIVE);
+	
+	@Override
+	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+		response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+		response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Request-With, location");
+		response.setHeader("Access-Control-Allow-Credentials", "true");
+		response.setHeader("Content-Length", "0");
+		response.setHeader("Content-Type", "text/plain");
+		response.setStatus(HttpServletResponse.SC_OK);
+	}
 	
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
