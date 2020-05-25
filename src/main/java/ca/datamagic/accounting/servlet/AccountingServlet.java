@@ -38,12 +38,22 @@ public class AccountingServlet extends HttpServlet {
 	private static final Pattern filesPattern = Pattern.compile("/files", Pattern.CASE_INSENSITIVE);
 	private static final Pattern loadedPattern = Pattern.compile("/loaded", Pattern.CASE_INSENSITIVE);
 	
+	private static void addCorsHeaders(String origin, HttpServletResponse response) {
+		if ((origin != null) && (origin.length() > 0)) {
+			if (origin.compareToIgnoreCase("http://localhost:4200") == 0) {
+				response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+				response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+				response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Request-With, location");
+				response.setHeader("Access-Control-Allow-Credentials", "true");
+			}
+		}
+	}
+	
 	@Override
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
-		response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-		response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Request-With, location");
-		response.setHeader("Access-Control-Allow-Credentials", "true");
+		String origin = request.getHeader("Origin");
+		logger.debug("origin: " + origin);
+		addCorsHeaders(origin, response);
 		response.setHeader("Content-Length", "0");
 		response.setHeader("Content-Type", "text/plain");
 		response.setStatus(HttpServletResponse.SC_OK);
@@ -52,6 +62,8 @@ public class AccountingServlet extends HttpServlet {
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
+			String origin = request.getHeader("Origin");
+			logger.debug("origin: " + origin);
 			String pathInfo = request.getPathInfo();
 			logger.debug("pathInfo: " + pathInfo);
 			Matcher accountingStatsMatcher = accountingStatsPattern.matcher(pathInfo);
@@ -78,6 +90,7 @@ public class AccountingServlet extends HttpServlet {
 				AccountingDAO dao = new AccountingDAO();
 				List<EventDTO> events = dao.loadEvents(intStartYear, intStartMonth, intStartDay, intEndYear, intEndMonth, intEndDay);
 				String json = (new Gson()).toJson(events);
+				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -88,6 +101,7 @@ public class AccountingServlet extends HttpServlet {
 				AccountingDAO dao = new AccountingDAO();
 				String timeStamp = dao.minTimeStamp();
 				String json = (new Gson()).toJson(timeStamp);
+				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -98,6 +112,7 @@ public class AccountingServlet extends HttpServlet {
 				AccountingDAO dao = new AccountingDAO();
 				String timeStamp = dao.maxTimeStamp();
 				String json = (new Gson()).toJson(timeStamp);
+				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -108,6 +123,7 @@ public class AccountingServlet extends HttpServlet {
 				AccountingDAO dao = new AccountingDAO();
 				String[] files = dao.getAccountingFiles();
 				String json = (new Gson()).toJson(files);
+				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -118,6 +134,7 @@ public class AccountingServlet extends HttpServlet {
 				AccountingDAO dao = new AccountingDAO();
 				String[] files = dao.getLoadedFiles();
 				String json = (new Gson()).toJson(files);
+				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
