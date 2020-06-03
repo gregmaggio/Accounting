@@ -10,6 +10,7 @@ import java.net.URL;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -26,6 +27,17 @@ import ca.datamagic.accounting.util.IOUtils;
 public abstract class AuthenticatedServlet extends HttpServlet {
 	private static final Logger logger = LogManager.getLogger(AuthenticatedServlet.class);
 	private static final long serialVersionUID = 1L;
+	
+	protected static void addCorsHeaders(String origin, HttpServletResponse response) {
+		if ((origin != null) && (origin.length() > 0)) {
+			if (origin.compareToIgnoreCase("http://localhost:4200") == 0) {
+				response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+				response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+				response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Request-With, location");
+				response.setHeader("Access-Control-Allow-Credentials", "true");
+			}
+		}
+	}
 	
 	protected static boolean isAuthenticated(HttpServletRequest request) throws IOException {
 		AccountingDAO dao = new AccountingDAO();

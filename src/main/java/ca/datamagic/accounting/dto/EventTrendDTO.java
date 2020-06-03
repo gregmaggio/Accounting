@@ -3,14 +3,16 @@
  */
 package ca.datamagic.accounting.dto;
 
+import java.util.List;
+
 /**
  * @author Greg
  *
  */
-public class EventDTO {
+public class EventTrendDTO {
 	private String eventName = null;
 	private String eventMessage = null;
-	private Long count = null;
+	private List<EventTrendSeriesDTO> series = null;
 	
 	public String getEventName() {
 		return this.eventName;
@@ -20,8 +22,8 @@ public class EventDTO {
 		return this.eventMessage;
 	}
 	
-	public Long getCount() {
-		return this.count;
+	public List<EventTrendSeriesDTO> getSeries() {
+		return this.series;
 	}
 	
 	public void setEventName(String newVal) {
@@ -32,8 +34,8 @@ public class EventDTO {
 		this.eventMessage = newVal;
 	}
 	
-	public void setCount(Long newVal) {
-		this.count = newVal;
+	public void setSeries(List<EventTrendSeriesDTO> newVal) {
+		this.series = newVal;
 	}
 	
 	@Override
@@ -42,8 +44,17 @@ public class EventDTO {
 		builder.append(this.eventName);
 		builder.append(":");
 		builder.append(this.eventMessage);
-		builder.append(":");
-		builder.append(this.count);
+		if (this.series != null) {
+			builder.append(":");
+			builder.append("[");
+			for (int ii = 0; ii < this.series.size(); ii++) {
+				if (ii > 0) {
+					builder.append(",");
+				}
+				builder.append(this.series.get(ii).toString());
+			}
+			builder.append("]");
+		}
 		return builder.toString();
 	}
 }

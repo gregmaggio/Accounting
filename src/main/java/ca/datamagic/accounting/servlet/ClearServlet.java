@@ -29,6 +29,8 @@ public class ClearServlet extends AuthenticatedServlet {
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		logger.debug("doPost");
+		String origin = request.getHeader("Origin");
+		logger.debug("origin: " + origin);
 		if (!isAuthenticated(request)) {
 			response.sendError(401);
 			return;
@@ -39,5 +41,6 @@ public class ClearServlet extends AuthenticatedServlet {
 			logger.error("Exception", ex);
 			throw new IOException(ex);
 		}
+		addCorsHeaders(origin, response);
 	}
 }

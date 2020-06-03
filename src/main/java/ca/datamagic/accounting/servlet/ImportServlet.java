@@ -5,6 +5,7 @@ package ca.datamagic.accounting.servlet;
 
 import java.io.IOException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,12 +26,26 @@ public class ImportServlet extends AuthenticatedServlet {
 	private static final long serialVersionUID = 1L;	
 	
 	@Override
+	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String origin = request.getHeader("Origin");
+		logger.debug("origin: " + origin);
+		addCorsHeaders(origin, response);
+		response.setHeader("Content-Length", "0");
+		response.setHeader("Content-Type", "text/plain");
+		response.setStatus(HttpServletResponse.SC_OK);
+	}
+	
+	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String origin = request.getHeader("Origin");
+		logger.debug("origin: " + origin);
+		
 		if (!isAuthenticated(request)) {
 			response.sendError(401);
 			return;
 		}
 		String json = (new Gson()).toJson(Importer.getImporters());
+		addCorsHeaders(origin, response);
 		response.setContentType("application/json");
 		response.getWriter().print(json);
 	}
@@ -38,6 +53,9 @@ public class ImportServlet extends AuthenticatedServlet {
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		logger.debug("doPost");
+		String origin = request.getHeader("Origin");
+		logger.debug("origin: " + origin);
+		
 		if (!isAuthenticated(request)) {
 			response.sendError(401);
 			return;
@@ -65,6 +83,7 @@ public class ImportServlet extends AuthenticatedServlet {
 			return;
 		}
 		
-		response.sendRedirect("/Accounting/importers.html");
+		addCorsHeaders(origin, response);
+		//response.sendRedirect("/Accounting/importers.html");
 	}
 }

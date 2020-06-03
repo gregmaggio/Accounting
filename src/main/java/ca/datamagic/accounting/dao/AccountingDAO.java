@@ -31,6 +31,9 @@ import org.apache.log4j.Logger;
 
 import ca.datamagic.accounting.dto.AccountingDTO;
 import ca.datamagic.accounting.dto.EventDTO;
+import ca.datamagic.accounting.dto.EventNameDTO;
+import ca.datamagic.accounting.dto.EventTrendDTO;
+import ca.datamagic.accounting.dto.EventTrendSeriesDTO;
 import ca.datamagic.accounting.util.DBUtils;
 import ca.datamagic.accounting.util.IOUtils;
 
@@ -216,7 +219,7 @@ public class AccountingDAO extends BaseDAO {
 			String endTimeUTC = dateFormat.format(endTime.getTime());
 			logger.debug("endTimeUTC: " + endTimeUTC);
 			connection = DriverManager.getConnection(getConnectionString(), getUserName(), getPassword());
-			statement = connection.prepareStatement("select event_name, count(event_message) as event_count from accounting where time_stamp > ? and time_stamp < ? group by event_name order by event_name");
+			statement = connection.prepareStatement("select event_name, event_message, count(event_message) as event_count from accounting where time_stamp > ? and time_stamp < ? group by event_name, event_message order by event_name, event_message");
 			statement.setString(1, startTimeUTC);
 			statement.setString(2, endTimeUTC);
 			resultSet = statement.executeQuery();
@@ -224,10 +227,110 @@ public class AccountingDAO extends BaseDAO {
 			while (resultSet.next()) {
 				EventDTO dto = new EventDTO();
 				dto.setEventName(resultSet.getString("event_name"));
+				dto.setEventMessage(resultSet.getString("event_message"));
 				dto.setCount(resultSet.getLong("event_count"));
 				events.add(dto);
 			}
 			return events;
+		} finally {
+			if (resultSet != null) {
+				DBUtils.close(resultSet);
+			}
+			if (statement != null) {
+				DBUtils.close(statement);
+			}
+			if (connection != null) {
+				DBUtils.close(connection);
+			}
+		}
+	}
+	
+	public List<EventNameDTO> loadEventNames() throws SQLException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		try {
+			logger.debug("loadEventNames");
+			connection = DriverManager.getConnection(getConnectionString(), getUserName(), getPassword());
+			statement = connection.prepareStatement("select distinct event_name, event_message from accounting order by event_name, event_message");
+			resultSet = statement.executeQuery();
+			List<EventNameDTO> eventNames = new ArrayList<EventNameDTO>();
+			while (resultSet.next()) {
+				EventNameDTO dto = new EventNameDTO();
+				dto.setEventName(resultSet.getString("event_name"));
+				dto.setEventMessage(resultSet.getString("event_message"));
+				eventNames.add(dto);
+			}
+			return eventNames;
+		} finally {
+			if (resultSet != null) {
+				DBUtils.close(resultSet);
+			}
+			if (statement != null) {
+				DBUtils.close(statement);
+			}
+			if (connection != null) {
+				DBUtils.close(connection);
+			}
+		}
+	}
+	
+	public EventTrendDTO loadEventTrend(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay, String eventName, String eventMessage) throws SQLException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		try {
+			logger.debug("loadEventTrend");
+			logger.debug("startYear: " + Integer.toString(startYear));
+			logger.debug("startMonth: " + Integer.toString(startMonth));
+			logger.debug("startDay: " + Integer.toString(startDay));
+			logger.debug("endYear: " + Integer.toString(endYear));
+			logger.debug("endMonth: " + Integer.toString(endMonth));
+			logger.debug("endDay: " + Integer.toString(endDay));
+			logger.debug("eventName: " + eventName);
+			logger.debug("eventMessage: " + eventMessage);
+			Calendar startTime = Calendar.getInstance();
+			startTime.set(Calendar.YEAR, startYear);
+			startTime.set(Calendar.MONTH, startMonth - 1);
+			startTime.set(Calendar.DAY_OF_MONTH, startDay);
+			startTime.set(Calendar.HOUR_OF_DAY, 0);
+			startTime.set(Calendar.MINUTE, 0);
+			startTime.set(Calendar.SECOND, 0);
+			startTime.set(Calendar.MILLISECOND, 0);
+			String startTimeUTC = dateFormat.format(startTime.getTime());
+			logger.debug("startTimeUTC: " + startTimeUTC);
+			Calendar endTime = Calendar.getInstance();
+			endTime.set(Calendar.YEAR, endYear);
+			endTime.set(Calendar.MONTH, endMonth - 1);
+			endTime.set(Calendar.DAY_OF_MONTH, endDay);
+			endTime.set(Calendar.HOUR_OF_DAY, 0);
+			endTime.set(Calendar.MINUTE, 0);
+			endTime.set(Calendar.SECOND, 0);
+			endTime.set(Calendar.MILLISECOND, 0);
+			endTime.add(Calendar.DAY_OF_MONTH, 1);
+			String endTimeUTC = dateFormat.format(endTime.getTime());
+			logger.debug("endTimeUTC: " + endTimeUTC);
+			connection = DriverManager.getConnection(getConnectionString(), getUserName(), getPassword());
+			statement = connection.prepareStatement("select YEAR(time_stamp) as event_year, MONTH(time_stamp) as event_month, DAY(time_stamp) as event_day, count(event_message) as event_count from accounting where time_stamp > ? and time_stamp < ? and event_name = ? and event_message = ? group by event_year, event_month, event_day order by event_year, event_month, event_day");
+			statement.setString(1, startTimeUTC);
+			statement.setString(2, endTimeUTC);
+			statement.setString(3, eventName);
+			statement.setString(4, eventMessage);
+			resultSet = statement.executeQuery();			
+			List<EventTrendSeriesDTO> eventTrendSeries = new ArrayList<EventTrendSeriesDTO>();
+			while (resultSet.next()) {
+				EventTrendSeriesDTO dto = new EventTrendSeriesDTO();
+				dto.setYear(resultSet.getInt("event_year"));
+				dto.setMonth(resultSet.getInt("event_month"));
+				dto.setDay(resultSet.getInt("event_day"));
+				dto.setCount(resultSet.getLong("event_count"));
+				eventTrendSeries.add(dto);
+			}
+			EventTrendDTO eventTrend = new EventTrendDTO();
+			eventTrend.setEventName(eventName);
+			eventTrend.setEventMessage(eventMessage);
+			eventTrend.setSeries(eventTrendSeries);
+			return eventTrend;
 		} finally {
 			if (resultSet != null) {
 				DBUtils.close(resultSet);

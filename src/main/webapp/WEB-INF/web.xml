@@ -59,8 +59,13 @@
         <servlet-name>SwaggerAPI</servlet-name>
         <url-pattern>/v2/api-docs</url-pattern>
     </servlet-mapping>
+	<error-page>
+		<error-code>404</error-code>
+		<location>/admin/index.html</location>
+	</error-page>
     <welcome-file-list>
         <welcome-file>swagger-ui.html</welcome-file>
+        <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 </web-app>
 
