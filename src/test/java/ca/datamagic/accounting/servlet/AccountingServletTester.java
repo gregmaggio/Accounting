@@ -27,7 +27,6 @@ import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,7 +37,6 @@ import ca.datamagic.accounting.dto.AccountingParameters;
 public class AccountingServletTester {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		DOMConfigurator.configure("src/test/resources/log4j.cfg.xml");
 	}
 
 	@Test

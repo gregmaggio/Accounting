@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+	<RollingFile
+	    name="accountingFile"
+	    fileName="C:/Temp/Logs/Accounting/accounting.csv"
+	    filePattern="C:/Temp/Logs/Accounting/accounting.csv.%d{yyyy-MM-dd}"
+	    ignoreExceptions="false">
+	    <PatternLayout>
+	        <Pattern>%d{yyyy-MM-dd HH:mm:ss z},%m%n</Pattern>
+	    </PatternLayout>
+	    <Policies>
+	        <TimeBasedTriggeringPolicy interval="1"/>
+	    </Policies>
+	</RollingFile>
+  </Appenders>
+  <Loggers>
+  	<Logger name="accountingFile" level="all">
+      <AppenderRef ref="accountingFile"/>
+    </Logger>
+    <Root level="all">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>

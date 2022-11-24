@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+	<RollingFile
+	    name="rollingFile"
+	    fileName="C:/Temp/Logs/Accounting/accounting.txt"
+	    filePattern="C:/Temp/Logs/Accounting/accounting.%d{yyyy-MM-dd}.txt"
+	    ignoreExceptions="false">
+	    <PatternLayout>
+	        <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c - %m%n</Pattern>
+	    </PatternLayout>
+	    <Policies>
+	        <TimeBasedTriggeringPolicy interval="1"/>
+	    </Policies>
+	</RollingFile>
+	<RollingFile
+	    name="accountingFile"
+	    fileName="C:/Temp/Logs/Accounting/accounting.csv"
+	    filePattern="C:/Temp/Logs/Accounting/accounting.csv.%d{yyyy-MM-dd}"
+	    ignoreExceptions="false">
+	    <PatternLayout>
+	        <Pattern>%d{yyyy-MM-dd HH:mm:ss z},%m%n</Pattern>
+	    </PatternLayout>
+	    <Policies>
+	        <TimeBasedTriggeringPolicy interval="1"/>
+	    </Policies>
+	</RollingFile>
+  </Appenders>
+  <Loggers>
+  	<Logger name="accountingFile" level="all">
+      <AppenderRef ref="accountingFile"/>
+    </Logger>
+    <Root level="all">
+      <AppenderRef ref="rollingFile"/>
+    </Root>
+  </Loggers>
+</Configuration>

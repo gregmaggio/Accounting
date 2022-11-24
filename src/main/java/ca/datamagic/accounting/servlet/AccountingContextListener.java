@@ -8,7 +8,8 @@ import java.text.MessageFormat;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import ca.datamagic.accounting.dao.BaseDAO;
 
@@ -17,16 +18,18 @@ import ca.datamagic.accounting.dao.BaseDAO;
  *
  */
 public class AccountingContextListener implements ServletContextListener {
+	private static Logger logger = LogManager.getLogger(AccountingContextListener.class);
+	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		String realPath = sce.getServletContext().getRealPath("/");
 		String dataPath = MessageFormat.format("{0}/WEB-INF/classes", realPath);
-		String fileName = MessageFormat.format("{0}/WEB-INF/classes/log4j.cfg.xml", realPath);
-		DOMConfigurator.configure(fileName);
 		BaseDAO.setDataPath(dataPath);
+		logger.debug("contextInitialized");
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
+		logger.debug("contextDestroyed");
 	}
 }

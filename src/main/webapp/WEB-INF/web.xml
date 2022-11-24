@@ -11,18 +11,31 @@
 		<listener-class>ca.datamagic.accounting.servlet.AccountingContextListener</listener-class>
 	</listener>
 
+	<filter>
+		<filter-name>CORSFilter</filter-name>
+		<filter-class>ca.datamagic.filter.CORSFilter</filter-class>
+		<init-param>
+			<param-name>allow.origins</param-name>
+			<param-value>http://localhost:4200,http://localhost:8080,http://datamagic.ca,https://datamagic.ca</param-value>
+		</init-param>
+		<init-param>
+			<param-name>allow.methods</param-name>
+			<param-value>GET,POST,HEAD,OPTIONS,PUT,DELETE</param-value>
+		</init-param>
+		<init-param>
+			<param-name>allow.headers</param-name>
+			<param-value>Origin,Content-Type,Accept,Authorization,X-Request-With,location</param-value>
+		</init-param>
+		<init-param>
+			<param-name>allow.credentials</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	
     <servlet>
         <servlet-name>Accounting</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.AccountingServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>Import</servlet-name>
-        <servlet-class>ca.datamagic.accounting.servlet.ImportServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>Clear</servlet-name>
-        <servlet-class>ca.datamagic.accounting.servlet.ClearServlet</servlet-class>
-    </servlet>    
+    </servlet>   
 	<servlet>
         <servlet-name>SwaggerUI</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.SwaggerUIServlet</servlet-class>
@@ -35,14 +48,6 @@
         <servlet-name>SwaggerAPI</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.SwaggerAPIServlet</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>Import</servlet-name>
-        <url-pattern>/api/import</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>Clear</servlet-name>
-        <url-pattern>/api/clear</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Accounting</servlet-name>
         <url-pattern>/api/*</url-pattern>
@@ -65,7 +70,6 @@
 	</error-page>
     <welcome-file-list>
         <welcome-file>swagger-ui.html</welcome-file>
-        <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 </web-app>
 

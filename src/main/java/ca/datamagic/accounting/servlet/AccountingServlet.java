@@ -10,16 +10,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 
 import ca.datamagic.accounting.dao.AccountingDAO;
+import ca.datamagic.accounting.dao.BigQueryDAO;
 import ca.datamagic.accounting.dto.AccountingParameters;
 import ca.datamagic.accounting.dto.EventDTO;
 import ca.datamagic.accounting.dto.EventNameDTO;
@@ -29,42 +30,23 @@ import ca.datamagic.accounting.dto.EventTrendDTO;
  * @author Greg
  *
  */
-public class AccountingServlet extends AuthenticatedServlet {
+public class AccountingServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LogManager.getLogger(AccountingServlet.class);
-	private static final Logger accounting = LogManager.getLogger("accountingFile");
 	private static final Pattern accountingStatsPattern = Pattern.compile("/stats/(?<startYear>\\d+)/(?<startMonth>\\d+)/(?<startDay>\\d+)/(?<endYear>\\d+)/(?<endMonth>\\d+)/(?<endDay>\\d+)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern minTimeStampPattern = Pattern.compile("/min", Pattern.CASE_INSENSITIVE);
 	private static final Pattern maxTimeStampPattern = Pattern.compile("/max", Pattern.CASE_INSENSITIVE);
-	private static final Pattern filesPattern = Pattern.compile("/files", Pattern.CASE_INSENSITIVE);
-	private static final Pattern loadedPattern = Pattern.compile("/loaded", Pattern.CASE_INSENSITIVE);
 	private static final Pattern eventNamesPattern = Pattern.compile("/eventNames", Pattern.CASE_INSENSITIVE);
-	private static final Pattern trendPattern = Pattern.compile("/trend/(?<startYear>\\d+)/(?<startMonth>\\d+)/(?<startDay>\\d+)/(?<endYear>\\d+)/(?<endMonth>\\d+)/(?<endDay>\\d+)/(?<eventName>\\w+)/(?<eventMessage>\\w+)", Pattern.CASE_INSENSITIVE);
-	
-	@Override
-	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String origin = request.getHeader("Origin");
-		logger.debug("origin: " + origin);
-		addCorsHeaders(origin, response);
-		response.setHeader("Content-Length", "0");
-		response.setHeader("Content-Type", "text/plain");
-		response.setStatus(HttpServletResponse.SC_OK);
-	}
+	private static final Pattern trendPattern = Pattern.compile("/trend/(?<startYear>\\d+)/(?<startMonth>\\d+)/(?<startDay>\\d+)/(?<endYear>\\d+)/(?<endMonth>\\d+)/(?<endDay>\\d+)/(?<eventName>\\w+)/(?<eventMessage>\\w+)", Pattern.CASE_INSENSITIVE);	
 	
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
-			String origin = request.getHeader("Origin");
-			logger.debug("origin: " + origin);
 			String pathInfo = request.getPathInfo();
 			logger.debug("pathInfo: " + pathInfo);
 			Matcher accountingStatsMatcher = accountingStatsPattern.matcher(pathInfo);
 			if (accountingStatsMatcher.find()) {
 				logger.debug("accountingStatsMatcher");
-				if (!isAuthenticated(request)) {
-					response.sendError(401);
-					return;
-				}
 				String startYear = accountingStatsMatcher.group("startYear");
 				String startMonth = accountingStatsMatcher.group("startMonth");
 				String startDay = accountingStatsMatcher.group("startDay");
@@ -83,10 +65,9 @@ public class AccountingServlet extends AuthenticatedServlet {
 				Integer intEndYear = Integer.parseInt(endYear);
 				Integer intEndMonth = Integer.parseInt(endMonth);
 				Integer intEndDay = Integer.parseInt(endDay);
-				AccountingDAO dao = new AccountingDAO();
+				BigQueryDAO dao = new BigQueryDAO();
 				List<EventDTO> events = dao.loadEvents(intStartYear, intStartMonth, intStartDay, intEndYear, intEndMonth, intEndDay);
 				String json = (new Gson()).toJson(events);
-				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -94,14 +75,9 @@ public class AccountingServlet extends AuthenticatedServlet {
 			Matcher minTimeStampMatcher = minTimeStampPattern.matcher(pathInfo);
 			if (minTimeStampMatcher.find()) {
 				logger.debug("minTimeStampMatcher");
-				if (!isAuthenticated(request)) {
-					response.sendError(401);
-					return;
-				}
-				AccountingDAO dao = new AccountingDAO();
+				BigQueryDAO dao = new BigQueryDAO();
 				String timeStamp = dao.minTimeStamp();
 				String json = (new Gson()).toJson(timeStamp);
-				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -109,44 +85,9 @@ public class AccountingServlet extends AuthenticatedServlet {
 			Matcher maxTimeStampMatcher = maxTimeStampPattern.matcher(pathInfo);
 			if (maxTimeStampMatcher.find()) {
 				logger.debug("maxTimeStampMatcher");
-				if (!isAuthenticated(request)) {
-					response.sendError(401);
-					return;
-				}
-				AccountingDAO dao = new AccountingDAO();
+				BigQueryDAO dao = new BigQueryDAO();
 				String timeStamp = dao.maxTimeStamp();
 				String json = (new Gson()).toJson(timeStamp);
-				addCorsHeaders(origin, response);
-				response.setContentType("application/json");
-				response.getWriter().println(json);
-				return;
-			}
-			Matcher filesMatcher = filesPattern.matcher(pathInfo);
-			if (filesMatcher.find()) {
-				logger.debug("filesMatcher");
-				if (!isAuthenticated(request)) {
-					response.sendError(401);
-					return;
-				}
-				AccountingDAO dao = new AccountingDAO();
-				String[] files = dao.getAccountingFiles();
-				String json = (new Gson()).toJson(files);
-				addCorsHeaders(origin, response);
-				response.setContentType("application/json");
-				response.getWriter().println(json);
-				return;
-			}
-			Matcher loadedMatcher = loadedPattern.matcher(pathInfo);
-			if (loadedMatcher.find()) {
-				logger.debug("loadedMatcher");
-				if (!isAuthenticated(request)) {
-					response.sendError(401);
-					return;
-				}
-				AccountingDAO dao = new AccountingDAO();
-				String[] files = dao.getLoadedFiles();
-				String json = (new Gson()).toJson(files);
-				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -154,14 +95,9 @@ public class AccountingServlet extends AuthenticatedServlet {
 			Matcher eventNamesMatcher = eventNamesPattern.matcher(pathInfo);
 			if (eventNamesMatcher.find()) {
 				logger.debug("eventNamesMatcher");
-				if (!isAuthenticated(request)) {
-					response.sendError(401);
-					return;
-				}
-				AccountingDAO dao = new AccountingDAO();
+				BigQueryDAO dao = new BigQueryDAO();
 				List<EventNameDTO> eventNames = dao.loadEventNames();
 				String json = (new Gson()).toJson(eventNames);
-				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -169,10 +105,6 @@ public class AccountingServlet extends AuthenticatedServlet {
 			Matcher trendMatcher = trendPattern.matcher(pathInfo);
 			if (trendMatcher.find()) {
 				logger.debug("trendMatcher");
-				if (!isAuthenticated(request)) {
-					response.sendError(401);
-					return;
-				}
 				String startYear = trendMatcher.group("startYear");
 				String startMonth = trendMatcher.group("startMonth");
 				String startDay = trendMatcher.group("startDay");
@@ -195,10 +127,9 @@ public class AccountingServlet extends AuthenticatedServlet {
 				Integer intEndYear = Integer.parseInt(endYear);
 				Integer intEndMonth = Integer.parseInt(endMonth);
 				Integer intEndDay = Integer.parseInt(endDay);
-				AccountingDAO dao = new AccountingDAO();
+				BigQueryDAO dao = new BigQueryDAO();
 				EventTrendDTO eventTrend = dao.loadEventTrend(intStartYear, intStartMonth, intStartDay, intEndYear, intEndMonth, intEndDay, eventName, eventMessage);
 				String json = (new Gson()).toJson(eventTrend);
-				addCorsHeaders(origin, response);
 				response.setContentType("application/json");
 				response.getWriter().println(json);
 				return;
@@ -222,30 +153,8 @@ public class AccountingServlet extends AuthenticatedServlet {
 			}
 			String requestText = builder.toString();
 			AccountingParameters parameters = (new Gson()).fromJson(requestText, AccountingParameters.class);
-			StringBuilder message = new StringBuilder();
-			if (parameters.getDeviceLatitude() != null) {
-				message.append(Double.toString(parameters.getDeviceLatitude().doubleValue()));
-			}
-			message.append(",");
-			if (parameters.getDeviceLongitude() != null) {
-				message.append(Double.toString(parameters.getDeviceLongitude().doubleValue()));
-			}
-			message.append(",");
-			if (parameters.getEventName() != null) {
-				message.append(parameters.getEventName());
-			}
-			message.append(",");
-			if (parameters.getEventMessage() != null) {
-				boolean containsComma = parameters.getEventMessage().contains(",");
-				if (containsComma) {
-					message.append("\"");
-				}
-				message.append(parameters.getEventMessage());
-				if (containsComma) {
-					message.append("\"");
-				}
-			}
-			accounting.debug(message.toString());
+			AccountingDAO dao = new AccountingDAO();
+			dao.log(parameters);
 		} catch (Throwable t) {
 			logger.error("Exceptoon", t);
 			throw new IOError(t);
