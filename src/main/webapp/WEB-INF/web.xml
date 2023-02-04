@@ -48,6 +48,12 @@
         <servlet-name>SwaggerAPI</servlet-name>
         <servlet-class>ca.datamagic.accounting.servlet.SwaggerAPIServlet</servlet-class>
     </servlet>
+	
+	<filter-mapping>
+		<filter-name>CORSFilter</filter-name>
+		<url-pattern>/api/*</url-pattern>
+	</filter-mapping>
+	
     <servlet-mapping>
         <servlet-name>Accounting</servlet-name>
         <url-pattern>/api/*</url-pattern>
