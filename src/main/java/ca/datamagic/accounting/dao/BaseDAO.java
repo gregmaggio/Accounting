@@ -9,9 +9,6 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Properties;
 
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.common.collect.Lists;
-
 import ca.datamagic.accounting.util.IOUtils;
 
 /**
@@ -21,7 +18,6 @@ import ca.datamagic.accounting.util.IOUtils;
 public abstract class BaseDAO {
 	private static String dataPath = "C:/Dev/Accounting/src/main/resources";
 	private Properties properties = null;
-	private GoogleCredentials credentials = null;
 	
 	public static String getDataPath() {
 		return dataPath;
@@ -44,12 +40,5 @@ public abstract class BaseDAO {
 			}
 		}
 		return this.properties;
-	}
-	
-	public GoogleCredentials getCredentials() throws IOException {
-		if (this.credentials == null) {
-			this.credentials = GoogleCredentials.fromStream(new FileInputStream(MessageFormat.format("{0}/secure.json", dataPath))).createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
-		}
-		return this.credentials;
 	}
 }
